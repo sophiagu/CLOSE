@@ -1,4 +1,3 @@
-
 import argparse
 import json
 import logging
@@ -9,11 +8,12 @@ import numpy as np
 
 from l2v.data.coco_captioning import CocoCaptioning, CocoSCE
 from l2v.data.dataset import Dataset
+from l2v.data.visual_news import VisualNews
 from l2v.data.vqa_e import EVQA
 from l2v.data.vqa_v2 import Vqa2
 from l2v.eval.evaluation import save_predictions, save_evaluation
 from l2v.model.model import BeamSearchSpec
-from l2v.train.evaluator import CaptionEvaluator, Evaluator, ResultKey, VqaEvaluator
+from l2v.train.evaluator import CaptionEvaluator, Evaluator, ResultKey, VqaEvaluator, VisualNewsEvaluator
 from l2v.train.runner import prediction_args_to_json, run
 from l2v.utils import py_utils, pytorch_utils
 from l2v.utils.to_params import to_params
@@ -30,6 +30,8 @@ def get_default_seq_len(ds: Dataset) -> int:
     return 30
   if isinstance(ds, (Vqa2, EVQA)):
     return 24
+  if isinstance(ds, (VisualNews)):
+    return 30
   else:
     raise NotImplementedError(f"No default lengths set for dataset {ds}")
 
@@ -39,6 +41,8 @@ def get_evaluator(ds: Dataset) -> Union[Evaluator, None]:
     return CaptionEvaluator()
   if isinstance(ds, (Vqa2, EVQA)):
     return VqaEvaluator()
+  if isinstance(ds, (VisualNews)):
+    return VisualNewsEvaluator()
   else:
     raise ValueError()
 
@@ -197,6 +201,8 @@ def main():
       datasets.append(CocoCaptioning("val", sample=args.sample))
     elif ds == "evqa":
       datasets.append(EVQA("val", sample=args.sample))
+    elif ds == "vis-news":
+      datasets.append(VisualNews("test", sample=args.sample))
     else:
       raise RuntimeError(ds)
 
