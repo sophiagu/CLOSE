@@ -76,10 +76,10 @@ def main():
     scheduler = None
 
   trainer = TrainerSimple(
-    train_dataset=VisualNews("train", sample=50 if dbg else .1),
+    train_dataset=VisualNews("train", sample=50 if dbg else None),
     optimizer=AdamWBuilder(lr=args.lr, weight_decay=0.0, parameter_groups=[]),
     epochs=args.epochs,
-    eval_dataset=VisualNews("val", sample=50 if dbg else .1),
+    eval_dataset=VisualNews("val", sample=50 if dbg else None),
     batch_size=args.batch_size,
     evaluator=VisualNewsEvaluator(),
     prediction_args=dict(beam_search_spec=BeamSearchSpec(2, 16)),
