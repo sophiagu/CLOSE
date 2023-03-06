@@ -305,18 +305,23 @@ class VisualNewsEvaluator(Evaluator):
     return per_examples_scores
 
   def _get_scores(self,  examples: List[VisualNewsExample], predictions: Dict[str, Any]):
+    MAX_LOG_EXAMPLES = 3 # adjust this to list more examples in testing
+    MAX_CAPTION_LEN = 2_000
+
     gts = {}
     res = {}
     for ix, instance in enumerate(examples):
       key = instance.get_example_id()
       assert key not in res
       res[key] = [predictions[instance.get_example_id()].text[0]]
-      gts[key] = [x.lower() for x in instance.caption]
+      gts[key] = [instance.caption.lower()]
 
-      # Log a few examples.
-      if ix < 3:
-        print(f'target caption: {gts[key]}\n')
-        print(f'predicted caption: {res[key]}\n\n')
+      if ix < MAX_LOG_EXAMPLES:
+        print(f'example id: {instance.example_id}')
+        print(f'image id: {instance.image_id}')
+        print(f'news article: {instance.article[:MAX_CAPTION_LEN]}\n')
+        print(f'target caption: {gts[key][0]}')
+        print(f'predicted caption: {res[key][0]}\n')
 
     res = self.tokenizer.tokenize(res)
     gts = self.tokenizer.tokenize(gts)
