@@ -109,7 +109,7 @@ class CovNoise(Layer):
           x = x + torch.unsqueeze(self._shift, 0)
         dist = multivariate_normal.MultivariateNormal(
           loc=torch.zeros(x.shape[1], device=device), covariance_matrix=self._cov)
-        x = x + dist.sample(x.shape[:1])*2.5
+        x = x + dist.sample(x.shape[:1])*3
       else:
         x = x + self._shift
       x = x + torch.randn_like(x)*self.scale
