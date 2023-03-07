@@ -10,6 +10,8 @@ from dataclasses import dataclass, replace
 
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.cider.cider import Cider
+from pycocoevalcap.meteor.meteor import Meteor
+from pycocoevalcap.rouge.rouge import Rouge
 
 from l2v.data.coco_captioning import CaptioningExample
 from l2v.data.visual_news import VisualNewsExample
@@ -237,12 +239,18 @@ class VisualNewsEvaluator(Evaluator):
   ):
     return super().from_params(params, constructor_to_call, constructor_to_inspect, **extras)
 
-  def __init__(self, cider=True, bleu=4):
+  def __init__(self, cider=True, meteor=True, rouge=True, bleu=4):
     self.cider = cider
+    self.meteor = meteor
+    self.rouge = rouge
     self.bleu = bleu
     scorers = {}
     if cider:
       scorers["cider"] = Cider()
+    if meteor:
+      scorers["meteor"] = Meteor()
+    if rouge:
+      scorers["rouge"] = Rouge()
     if bleu:
       scorers["bleu"] = Bleu(bleu)
     self.scorers = scorers
@@ -278,6 +286,10 @@ class VisualNewsEvaluator(Evaluator):
         corpus_scores, _ = all_scores[name]
         if isinstance(scorer, Cider):
           results["cider"] = corpus_scores
+        elif isinstance(scorer, Meteor):
+          results["meteor"] = corpus_scores
+        elif isinstance(scorer, Rouge):
+          results["rouge"] = corpus_scores
         elif isinstance(scorer, Bleu):
           scores, _ = all_scores[name]
           for i, score in enumerate(corpus_scores):
@@ -305,8 +317,8 @@ class VisualNewsEvaluator(Evaluator):
     return per_examples_scores
 
   def _get_scores(self,  examples: List[VisualNewsExample], predictions: Dict[str, Any]):
-    MAX_LOG_EXAMPLES = 3 # adjust this to list more examples in testing
-    MAX_CAPTION_LEN = 2_000
+    MAX_LOG_EXAMPLES = 0 # adjust this to list more examples
+    MAX_CAPTION_LEN = 1_800
 
     gts = {}
     res = {}
